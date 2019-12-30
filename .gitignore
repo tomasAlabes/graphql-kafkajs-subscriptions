@@ -7,3 +7,5 @@ mongoMockData.js
 .DS_Store
 .env
 scripts/dump
+.vscode
+.history

@@ -38,19 +38,19 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var iterall_1 = require("iterall");
 var PubSubAsyncIterator = (function () {
-    function PubSubAsyncIterator(pubsub, eventNames) {
+    function PubSubAsyncIterator(pubsub, eventNames, options) {
         this.pubsub = pubsub;
+        this.options = options;
         this.pullQueue = [];
         this.pushQueue = [];
         this.listening = true;
         this.eventsArray = typeof eventNames === 'string' ? [eventNames] : eventNames;
-        this.allSubscribed = this.subscribeAll();
     }
     PubSubAsyncIterator.prototype.next = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4, this.allSubscribed];
+                    case 0: return [4, this.subscribeAll()];
                     case 1:
                         _a.sent();
                         return [2, this.listening ? this.pullValue() : this.return()];
@@ -60,14 +60,11 @@ var PubSubAsyncIterator = (function () {
     };
     PubSubAsyncIterator.prototype.return = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var _a;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        _a = this.emptyQueue;
-                        return [4, this.allSubscribed];
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4, this.emptyQueue()];
                     case 1:
-                        _a.apply(this, [_b.sent()]);
+                        _a.sent();
                         return [2, { value: undefined, done: true }];
                 }
             });
@@ -75,14 +72,11 @@ var PubSubAsyncIterator = (function () {
     };
     PubSubAsyncIterator.prototype.throw = function (error) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0:
-                        _a = this.emptyQueue;
-                        return [4, this.allSubscribed];
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4, this.emptyQueue()];
                     case 1:
-                        _a.apply(this, [_b.sent()]);
+                        _a.sent();
                         return [2, Promise.reject(error)];
                 }
             });
@@ -91,18 +85,18 @@ var PubSubAsyncIterator = (function () {
     PubSubAsyncIterator.prototype[iterall_1.$$asyncIterator] = function () {
         return this;
     };
-    PubSubAsyncIterator.prototype.pushValue = function (message) {
+    PubSubAsyncIterator.prototype.pushValue = function (event) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4, this.allSubscribed];
+                    case 0: return [4, this.subscribeAll()];
                     case 1:
                         _a.sent();
                         if (this.pullQueue.length !== 0) {
-                            this.pullQueue.shift()({ value: message, done: false });
+                            this.pullQueue.shift()({ value: event, done: false });
                         }
                         else {
-                            this.pushQueue.push(message);
+                            this.pushQueue.push(event);
                         }
                         return [2];
                 }
@@ -120,18 +114,36 @@ var PubSubAsyncIterator = (function () {
             }
         });
     };
-    PubSubAsyncIterator.prototype.emptyQueue = function (subscriptionIds) {
-        if (this.listening) {
-            this.listening = false;
-            this.unsubscribeAll(subscriptionIds);
-            this.pullQueue.forEach(function (resolve) { return resolve({ value: undefined, done: true }); });
-            this.pullQueue.length = 0;
-            this.pushQueue.length = 0;
-        }
+    PubSubAsyncIterator.prototype.emptyQueue = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        if (!this.listening) return [3, 3];
+                        this.listening = false;
+                        if (!this.subscriptionIds) return [3, 2];
+                        _a = this.unsubscribeAll;
+                        return [4, this.subscriptionIds];
+                    case 1:
+                        _a.apply(this, [_b.sent()]);
+                        _b.label = 2;
+                    case 2:
+                        this.pullQueue.forEach(function (resolve) { return resolve({ value: undefined, done: true }); });
+                        this.pullQueue.length = 0;
+                        this.pushQueue.length = 0;
+                        _b.label = 3;
+                    case 3: return [2];
+                }
+            });
+        });
     };
     PubSubAsyncIterator.prototype.subscribeAll = function () {
         var _this = this;
-        return Promise.all(this.eventsArray.map(function (eventName) { return _this.pubsub.subscribe(eventName, _this.pushValue.bind(_this), {}); }));
+        if (!this.subscriptionIds) {
+            this.subscriptionIds = Promise.all(this.eventsArray.map(function (eventName) { return _this.pubsub.subscribe(eventName, _this.pushValue.bind(_this), _this.options); }));
+        }
+        return this.subscriptionIds;
     };
     PubSubAsyncIterator.prototype.unsubscribeAll = function (subscriptionIds) {
         for (var _i = 0, subscriptionIds_1 = subscriptionIds; _i < subscriptionIds_1.length; _i++) {
