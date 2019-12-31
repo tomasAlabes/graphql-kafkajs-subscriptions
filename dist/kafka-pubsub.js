@@ -114,7 +114,7 @@ var KafkaPubSub = (function () {
         for (var _i = 0, subscriptions_1 = subscriptions; _i < subscriptions_1.length; _i++) {
             var subId = subscriptions_1[_i];
             var _a = this.subscriptionMap[subId], cnl = _a[0], listener = _a[1];
-            listener(message.value);
+            listener(message);
         }
     };
     KafkaPubSub.prototype.createProducer = function () {

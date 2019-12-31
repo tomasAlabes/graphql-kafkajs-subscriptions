@@ -58,7 +58,7 @@ export class KafkaPubSub implements PubSubEngine {
 		} // no subscribers, don't publish msg
 		for (const subId of subscriptions) {
 			const [cnl, listener] = this.subscriptionMap[subId];
-			listener(message.value);
+			listener(message);
 		}
 	}
 
