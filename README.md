@@ -38,7 +38,7 @@ export const pubsub = new KafkaPubSub({
         return payload;
       },
       subscribe: (_, args) => {
-        return externalPubSub.asyncIterator<CollaborationMessage>(yourChannel);
+        return externalPubSub.asyncIterator<YourType>(yourChannel);
       }
     }
   };
