@@ -1,11 +1,5 @@
-node_modules
-bundle.js
-bundle.js.map
-npm-debug.log
-coverage
-mongoMockData.js
 .DS_Store
-.env
-scripts/dump
-.vscode
-.history
+.vscode/
+.history/
+node_modules/
+dist/
