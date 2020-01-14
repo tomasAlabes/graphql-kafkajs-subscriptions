@@ -1,4 +1,3 @@
-// tslint:disable
 // copied from: https://github.com/Wei-Zou/jest-mock-kafkajs/blob/master/__mocks__/kafkajs.js
 
 export class Producer {

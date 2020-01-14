@@ -8,7 +8,7 @@
     "test": "jest --watchAll",
     "build": "tsc",
     "watch": "tsc -w",
-    "prepublishOnly": "build"
+    "prepublishOnly": "yarn build"
   },
   "repository": {
     "type": "git",
@@ -21,7 +21,10 @@
     "subscriptions"
   ],
   "author": "Tomas Alabes",
-  "license": "ISC",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
   "bugs": {
     "url": "https://github.com/tomasAlabes/graphql-kafkajs-subscriptions/issues"
   },
@@ -32,7 +35,6 @@
     ],
     "moduleFileExtensions": [
       "ts",
-      "tsx",
       "js"
     ],
     "transform": {
@@ -42,14 +44,18 @@
   },
   "dependencies": {
     "graphql-subscriptions": "^1.1.0",
-    "kafkajs": "^1.11.0",
     "iterall": "^1.2.2"
   },
   "devDependencies": {
     "@types/jest": "^24.0.23",
     "@types/node": "^12.12.14",
     "jest": "^24.9.0",
+    "kafkajs": "^1.11.0",
     "ts-jest": "^24.2.0",
+    "tslint": "5.20.1",
     "typescript": "^3.7.3"
+  },
+  "peerDependencies": {
+    "kafkajs": "^1.11.0"
   }
 }
