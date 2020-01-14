@@ -7,7 +7,6 @@
     "strictNullChecks": false,
     "moduleResolution": "node",
     "removeComments": true,
-    "jsx": "react",
     "sourceMap": true,
     "declaration": true,
     "rootDir": "./src",
@@ -15,5 +14,5 @@
     "baseUrl": ".",
     "lib": ["es6", "esnext"]
   },
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["dist"]
 }
