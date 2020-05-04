@@ -1,1 +1,1 @@
-export { KafkaPubSub } from './kafka-pubsub'
+export { KafkaPubSub } from "./kafka-pubsub";

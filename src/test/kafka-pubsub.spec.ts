@@ -12,7 +12,7 @@ describe("Test Suite", () => {
     const pubsub = await KafkaPubSub.create({
       groupIdPrefix: "my-prefix",
       kafka: new Kafka() as any,
-      topic
+      topic,
     });
 
     await pubsub.subscribe(channel, onMessage);

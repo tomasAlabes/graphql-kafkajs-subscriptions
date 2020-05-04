@@ -1,5 +1,5 @@
 import { PubSubEngine } from "graphql-subscriptions";
-import { Consumer, Kafka, Producer } from "kafkajs";
+import { Consumer, Kafka, Producer, IHeaders } from "kafkajs";
 import { PubSubAsyncIterator } from "./pubsub-async-iterator";
 
 interface KafkaPubSubInput {
@@ -19,7 +19,7 @@ export class KafkaPubSub implements PubSubEngine {
   public static async create({
     kafka,
     topic,
-    groupIdPrefix
+    groupIdPrefix,
   }: KafkaPubSubInput): Promise<KafkaPubSub> {
     const pubsub = new KafkaPubSub({ kafka, topic, groupIdPrefix });
     await pubsub.connectProducer();
@@ -34,17 +34,33 @@ export class KafkaPubSub implements PubSubEngine {
     this.topic = topic;
     this.producer = this.client.producer();
     this.consumer = this.client.consumer({
-	  // we need all consumers listening to all messages
-      groupId: `${groupIdPrefix}-${Math.ceil(Math.random() * 9999)}`
+      // we need all consumers listening to all messages
+      groupId: `${groupIdPrefix}-${Math.ceil(Math.random() * 9999)}`,
     });
   }
 
-  public async publish(channel: string, payload: any): Promise<void> {
+  /**
+   *
+   * @param channel to use for internal routing, besides topic
+   * @param payload event to send
+   * @param headers optional kafkajs headers
+   * @param sendOptions optional kafkajs producer.send options
+   */
+  public async publish(
+    channel: string,
+    payload: object,
+    headers?: IHeaders,
+    sendOptions?: object
+  ): Promise<void> {
     await this.producer.send({
       messages: [
-        { value: Buffer.from(JSON.stringify({ channel, ...payload })) }
+        {
+          value: Buffer.from(JSON.stringify({ channel, ...payload })),
+          headers,
+        },
       ],
-      topic: this.topic
+      topic: this.topic,
+      ...sendOptions,
     });
   }
 
@@ -65,7 +81,7 @@ export class KafkaPubSub implements PubSubEngine {
     const [channel] = this.subscriptionMap[index];
     this.channelSubscriptions[channel] = this.channelSubscriptions[
       channel
-    ].filter(subId => subId !== index);
+    ].filter((subId) => subId !== index);
   }
 
   public asyncIterator<T>(triggers: string | string[]): AsyncIterator<T> {
@@ -101,7 +117,7 @@ export class KafkaPubSub implements PubSubEngine {
           // No channel abstraction, publish over the whole topic
           this.onMessage(topic, parsedMessage);
         }
-      }
+      },
     });
   }
 }

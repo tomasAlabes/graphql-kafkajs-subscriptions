@@ -59,14 +59,14 @@ export class Kafka {
 
   public producer() {
     return new Producer({
-      sendCb: this._sendCb.bind(this)
+      sendCb: this._sendCb.bind(this),
     });
   }
 
   public consumer({ groupId }: any) {
     return new Consumer({
       groupId,
-      subscribeCb: this._subscribeCb.bind(this)
+      subscribeCb: this._subscribeCb.bind(this),
     });
   }
 
@@ -84,7 +84,7 @@ export class Kafka {
           Math.random() * consumers.length
         );
         consumers[consumerToGetMessage].eachMessage({
-          message
+          message,
         });
       });
     });

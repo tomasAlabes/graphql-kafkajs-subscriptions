@@ -2,47 +2,53 @@
   "name": "graphql-kafkajs-subscriptions",
   "version": "1.0.1",
   "description": "Apollo graphql subscription over Kafka protocol",
-  "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
-  "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watchAll",
-    "build": "tsc",
-    "watch": "tsc -w",
-    "prepublishOnly": "yarn build",
-    "release": "standard-version"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/tomasAlabes/graphql-kafkajs-subscriptions.git"
-  },
   "keywords": [
     "graphql",
     "kafka",
     "apollo",
     "subscriptions"
   ],
-  "author": "Tomas Alabes",
-  "license": "MIT",
-  "files": [
-    "dist"
-  ],
+  "homepage": "https://github.com/tomasAlabes/graphql-kafkajs-subscriptions#readme",
   "bugs": {
     "url": "https://github.com/tomasAlabes/graphql-kafkajs-subscriptions/issues"
   },
-  "homepage": "https://github.com/tomasAlabes/graphql-kafkajs-subscriptions#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tomasAlabes/graphql-kafkajs-subscriptions.git"
+  },
+  "license": "MIT",
+  "author": "Tomas Alabes",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "format": "prettier --write src",
+    "prepublishOnly": "yarn build",
+    "release": "standard-version",
+    "test": "jest",
+    "test:watch": "jest --watchAll",
+    "watch": "tsc -w"
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E  HUSKY_GIT_PARAMS"
+    }
+  },
   "jest": {
-    "roots": [
-      "<rootDir>/src/test"
-    ],
     "moduleFileExtensions": [
       "ts",
       "js"
     ],
+    "roots": [
+      "<rootDir>/src/test"
+    ],
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(tsx?|jsx?)$",
     "transform": {
       "\\.(ts|tsx)$": "ts-jest"
-    },
-    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(tsx?|jsx?)$"
+    }
   },
   "dependencies": {
     "graphql-subscriptions": "^1.1.0",
@@ -54,17 +60,13 @@
     "@types/jest": "^24.0.23",
     "@types/node": "^12.12.14",
     "husky": "^4.2.3",
-    "jest": "^24.9.0",
-    "kafkajs": "^1.11.0",
+    "jest": "^25.4.0",
+    "kafkajs": "^1.12.0",
+    "prettier": "2.0.5",
     "standard-version": "^7.1.0",
     "ts-jest": "^24.2.0",
     "tslint": "5.20.1",
-    "typescript": "^3.7.3"
-  },
-  "husky": {
-    "hooks": {
-      "commit-msg": "commitlint -E  HUSKY_GIT_PARAMS"
-    }
+    "typescript": "^3.8.3"
   },
   "peerDependencies": {
     "kafkajs": "^1.11.0"
