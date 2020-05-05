@@ -72,6 +72,19 @@ pubsub.publish("my channel", {
 });
 ```
 
+Use the rest of the kafkajs options:
+
+
+```javascript
+const event = {/* ... */};
+const headers = {
+  header1: "value"
+};
+const producerOptions = { /* options from kafka.js.org/docs/producing: acks, timeout, etc */ };
+
+pubsub.publish("my channel", event, headers, producerOptions);
+```
+
 This ends up publishing the event to kafka (to the topic you used to create the `kafkaPubSub`)
 and received by all consumers. The consumer which is listening to `my channel` will send it
 to the client.
