@@ -35,8 +35,9 @@ export const pubsub = KafkaPubSub.create({
 ```javascript
 {
     collaboration: {
-      resolve: (payload: YourType) => {
-        return payload;
+      resolve: (payload: KafkaMessage) => {
+        // payload.value will be whatever you sent
+        return payload.value;
       },
       subscribe: (_, args) => {
         return pubsub.asyncIterator<YourType>("my channel");
@@ -50,9 +51,9 @@ You can also use the subscription payload for the channel.
 ```javascript
 {
     collaboration: {
-      resolve: (payload: YourType) => {
+      resolve: (payload: KafkaMessage) => {
         // what you publish will end up passing through here and to the client
-        return payload;
+        return payload.value;
       },
       subscribe: (_, args) => {
         // this is called from the client

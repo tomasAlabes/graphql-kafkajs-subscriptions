@@ -1,5 +1,5 @@
 import { PubSubEngine } from "graphql-subscriptions";
-import { Consumer, Kafka, Producer, IHeaders } from "kafkajs";
+import { Consumer, Kafka, Producer, IHeaders, KafkaMessage } from "kafkajs";
 import { PubSubAsyncIterator } from "./pubsub-async-iterator";
 
 interface KafkaPubSubInput {
@@ -8,9 +8,15 @@ interface KafkaPubSubInput {
   groupIdPrefix: string;
 }
 
+export type MessageHandler = (msg: KafkaMessage) => any;
+
+interface SubscriptionsMap {
+  [subId: number]: [string, MessageHandler];
+}
+
 export class KafkaPubSub implements PubSubEngine {
   private client: Kafka;
-  private subscriptionMap: { [subId: number]: [string, Function] };
+  private subscriptionMap: SubscriptionsMap;
   private channelSubscriptions: { [channel: string]: number[] };
   private producer: Producer;
   private consumer: Consumer;
@@ -48,15 +54,18 @@ export class KafkaPubSub implements PubSubEngine {
    */
   public async publish(
     channel: string,
-    payload: object,
+    payload: string | Buffer,
     headers?: IHeaders,
     sendOptions?: object
   ): Promise<void> {
     await this.producer.send({
       messages: [
         {
-          value: Buffer.from(JSON.stringify({ channel, ...payload })),
-          headers,
+          value: payload,
+          headers: {
+            ...headers,
+            channel,
+          },
         },
       ],
       topic: this.topic,
@@ -66,8 +75,8 @@ export class KafkaPubSub implements PubSubEngine {
 
   public async subscribe(
     channel: string,
-    onMessage: Function,
-    options?: any
+    onMessage: MessageHandler,
+    _?: any
   ): Promise<number> {
     const index = Object.keys(this.subscriptionMap).length;
     this.subscriptionMap[index] = [channel, onMessage];
@@ -88,7 +97,7 @@ export class KafkaPubSub implements PubSubEngine {
     return new PubSubAsyncIterator<T>(this, triggers);
   }
 
-  private onMessage(channel: string, message: any) {
+  private onMessage(channel: string, message: KafkaMessage) {
     const subscriptions = this.channelSubscriptions[channel];
     if (!subscriptions) {
       return;
@@ -108,14 +117,12 @@ export class KafkaPubSub implements PubSubEngine {
     await this.consumer.subscribe({ topic });
     await this.consumer.run({
       eachMessage: async ({ message }) => {
-        const parsedMessage = JSON.parse(message.value.toString());
         // Using channel abstraction
-        if (parsedMessage.channel) {
-          const { channel, ...payload } = parsedMessage;
-          this.onMessage(channel, payload);
+        if (message.headers?.channel) {
+          this.onMessage(message.headers.channel as string, message);
         } else {
           // No channel abstraction, publish over the whole topic
-          this.onMessage(topic, parsedMessage);
+          this.onMessage(topic, message);
         }
       },
     });

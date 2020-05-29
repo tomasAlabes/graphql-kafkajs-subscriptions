@@ -1,6 +1,12 @@
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history
+
 .DS_Store
-.vscode/
-.history/
 node_modules/
 dist/
 yarn-error.log
