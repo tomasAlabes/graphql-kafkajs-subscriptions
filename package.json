@@ -27,7 +27,7 @@
     "build": "tsc",
     "format": "prettier --write src",
     "prepublishOnly": "yarn build",
-    "release": "standard-version",
+    "release": "yarn build && standard-version",
     "test": "jest",
     "test:watch": "jest --watchAll",
     "watch": "tsc -w"

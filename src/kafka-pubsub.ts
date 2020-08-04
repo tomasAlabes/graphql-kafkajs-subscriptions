@@ -14,8 +14,8 @@ interface KafkaPubSubInput {
   kafka: Kafka;
   topic: string;
   groupIdPrefix: string;
-  producerConfig: ProducerConfig;
-  consumerConfig: Omit<ConsumerConfig, "groupId">;
+  producerConfig?: ProducerConfig;
+  consumerConfig?: Omit<ConsumerConfig, "groupId">;
 }
 
 export type MessageHandler = (msg: KafkaMessage) => any;
