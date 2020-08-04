@@ -1,11 +1,21 @@
 import { PubSubEngine } from "graphql-subscriptions";
-import { Consumer, Kafka, Producer, IHeaders, KafkaMessage } from "kafkajs";
+import {
+  Consumer,
+  Kafka,
+  Producer,
+  ProducerConfig,
+  IHeaders,
+  KafkaMessage,
+  ConsumerConfig,
+} from "kafkajs";
 import { PubSubAsyncIterator } from "./pubsub-async-iterator";
 
 interface KafkaPubSubInput {
   kafka: Kafka;
   topic: string;
   groupIdPrefix: string;
+  producerConfig: ProducerConfig;
+  consumerConfig: Omit<ConsumerConfig, "groupId">;
 }
 
 export type MessageHandler = (msg: KafkaMessage) => any;
@@ -26,20 +36,35 @@ export class KafkaPubSub implements PubSubEngine {
     kafka,
     topic,
     groupIdPrefix,
+    producerConfig = {},
+    consumerConfig = {},
   }: KafkaPubSubInput): Promise<KafkaPubSub> {
-    const pubsub = new KafkaPubSub({ kafka, topic, groupIdPrefix });
+    const pubsub = new KafkaPubSub({
+      kafka,
+      topic,
+      groupIdPrefix,
+      producerConfig,
+      consumerConfig,
+    });
     await pubsub.connectProducer();
     await pubsub.runConsumer(pubsub.topic);
     return pubsub;
   }
 
-  private constructor({ kafka, topic, groupIdPrefix }: KafkaPubSubInput) {
+  private constructor({
+    kafka,
+    topic,
+    groupIdPrefix,
+    producerConfig,
+    consumerConfig,
+  }: KafkaPubSubInput) {
     this.client = kafka;
     this.subscriptionMap = {};
     this.channelSubscriptions = {};
     this.topic = topic;
-    this.producer = this.client.producer();
+    this.producer = this.client.producer(producerConfig);
     this.consumer = this.client.consumer({
+      ...consumerConfig,
       // we need all consumers listening to all messages
       groupId: `${groupIdPrefix}-${Math.ceil(Math.random() * 9999)}`,
     });
