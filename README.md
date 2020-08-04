@@ -26,7 +26,9 @@ import { KafkaPubSub } from 'graphql-kafkajs-subscriptions'
 export const pubsub = KafkaPubSub.create({
   topic: 'my-topic',
   kafka: new Kafka({/* ... */})
-  groupIdPrefix: "my-group-id-prefix" // used for kafka pub/sub
+  groupIdPrefix: "my-group-id-prefix", // used for kafka pub/sub,
+  producerConfig: {}, // optional kafkajs producer configuration
+  consumerConfig: {} // optional kafkajs consumer configuration
 })
 ```
 
