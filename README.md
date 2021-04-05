@@ -77,7 +77,6 @@ pubsub.publish("my channel", {
 
 Use the rest of the kafkajs options:
 
-
 ```javascript
 const event = {/* ... */};
 const headers = {
