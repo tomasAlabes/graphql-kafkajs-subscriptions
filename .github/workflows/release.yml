@@ -18,7 +18,7 @@ jobs:
     - run: yarn test
 
   publish:
-    needs: prepare
+    needs: test
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
