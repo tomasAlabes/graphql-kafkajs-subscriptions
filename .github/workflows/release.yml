@@ -14,8 +14,8 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v2
-      run: yarn --frozen-lockfile
-      run: yarn test
+    - run: yarn --frozen-lockfile
+    - run: yarn test
 
   prepare:
     needs: test
@@ -23,7 +23,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v2
-      run: yarn release
+    - run: yarn release
 
   publish:
     needs: prepare
