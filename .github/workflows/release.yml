@@ -17,20 +17,14 @@ jobs:
     - run: yarn --frozen-lockfile
     - run: yarn test
 
-  prepare:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v2
-    - run: yarn release
-
   publish:
     needs: prepare
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v2
+    - run: yarn --frozen-lockfile
+    - run: yarn release
     - name: publish
       run: git push --follow-tags origin master && npm publish
       env:
