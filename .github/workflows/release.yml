@@ -25,9 +25,13 @@ jobs:
     - uses: actions/setup-node@v2
     - run: yarn --frozen-lockfile
     - run: yarn release
-    - name: publish
-      run: git push --follow-tags origin master && npm publish
+    - name: GitHub Push
+      uses: ad-m/github-push-action@v0.6.0
+      with:
+        tags: true
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+    - name: publish-npm
+      run: npm publish
       env:
         NODE_AUTH_TOKEN: ${{secrets.npm_token}}
-        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      
