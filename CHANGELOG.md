@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.0-0](https://github.com/tomasAlabes/graphql-kafkajs-subscriptions/compare/v2.1.0...v3.0.0-0) (2022-08-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* breaking change on kafkajs and graphql-subscriptions versions
+
+### Features
+
+* updated core dependencies ([170f87b](https://github.com/tomasAlabes/graphql-kafkajs-subscriptions/commit/170f87b447abb45f532118dfde417526d6b635d4))
+
+
+### Bug Fixes
+
+* fixing npm audit issues ([1c3663f](https://github.com/tomasAlabes/graphql-kafkajs-subscriptions/commit/1c3663f607fee2b181578e3c92e0c9eb325530cb))
+
 ### 2.1.9 (2022-01-17)
 
 ### 2.1.8 (2022-01-17)
