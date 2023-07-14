@@ -80,6 +80,7 @@ export class KafkaPubSub implements PubSubEngine {
   public async publish(
     channel: string,
     payload: string | Buffer,
+    key: string | Buffer,
     headers?: IHeaders,
     sendOptions?: object
   ): Promise<void> {
@@ -87,6 +88,7 @@ export class KafkaPubSub implements PubSubEngine {
       messages: [
         {
           value: payload,
+          key,
           headers: {
             ...headers,
             channel,
