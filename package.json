@@ -32,7 +32,8 @@
     "test": "jest",
     "test:watch": "jest --watchAll",
     "watch": "tsc -w",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "postinstall": "npm build"
   },
   "jest": {
     "moduleFileExtensions": [
