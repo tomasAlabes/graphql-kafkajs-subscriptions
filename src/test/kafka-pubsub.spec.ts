@@ -61,7 +61,7 @@ describe("Test Suite", () => {
     await pubsub.subscribe(channel, onMessage);
 
     const headers = { custom: "header" };
-    await pubsub.publish(channel, payload, undefined, headers);
+    await pubsub.publish(channel, payload, headers);
     expect(onMessage).toBeCalled();
     expect(onMessage).toBeCalledWith({
       value: payload,
@@ -87,7 +87,7 @@ describe("Test Suite", () => {
 
     await pubsub.subscribe(channel, onMessage);
 
-    await pubsub.publish(channel, payload, key);
+    await pubsub.publish(channel, payload, undefined, undefined, key);
     expect(onMessage).toBeCalled();
     expect(onMessage).toBeCalledWith({
       value: payload,

@@ -81,9 +81,9 @@ export class KafkaPubSub implements PubSubEngine {
   public async publish(
     channel: string,
     payload: string | Buffer,
-    key?: string | Buffer,
     headers?: IHeaders,
-    sendOptions?: object
+    sendOptions?: object,
+    key?: string | Buffer,
   ): Promise<void> {
     await this.producer.send({
       messages: [
