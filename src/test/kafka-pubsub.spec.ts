@@ -71,4 +71,30 @@ describe("Test Suite", () => {
       },
     });
   });
+  it("should test basic pub sub with custom key", async () => {
+    const topic = "mock_topic";
+    const channel = "my_channel";
+    const payload = JSON.stringify({ data: 1 });
+    const key = "test-key";
+
+    const onMessage = jest.fn((msg: KafkaMessage) => {});
+
+    const pubsub = await KafkaPubSub.create({
+      groupIdPrefix: "my-prefix",
+      kafka: new Kafka() as any,
+      topic,
+    });
+
+    await pubsub.subscribe(channel, onMessage);
+
+    await pubsub.publish(channel, payload, undefined, undefined, key);
+    expect(onMessage).toBeCalled();
+    expect(onMessage).toBeCalledWith({
+      value: payload,
+      key,
+      headers: {
+        channel,
+      },
+    });
+  });
 });

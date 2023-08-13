@@ -74,6 +74,7 @@ export class KafkaPubSub implements PubSubEngine {
    *
    * @param channel to use for internal routing, besides topic
    * @param payload event to send
+   * @param key the key of the event
    * @param headers optional kafkajs headers
    * @param sendOptions optional kafkajs producer.send options
    */
@@ -81,12 +82,14 @@ export class KafkaPubSub implements PubSubEngine {
     channel: string,
     payload: string | Buffer,
     headers?: IHeaders,
-    sendOptions?: object
+    sendOptions?: object,
+    key?: string | Buffer,
   ): Promise<void> {
     await this.producer.send({
       messages: [
         {
           value: payload,
+          key,
           headers: {
             ...headers,
             channel,
