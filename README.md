@@ -29,6 +29,7 @@ export const pubsub = KafkaPubSub.create({
   groupIdPrefix: "my-group-id-prefix", // used for kafka pub/sub,
   producerConfig: {}, // optional kafkajs producer configuration
   consumerConfig: {} // optional kafkajs consumer configuration
+  resolveChannelFromMessage: () => "my channel" // optional function to resolve the channel from the message, by default message.headers.channel will be used
 })
 ```
 
@@ -78,11 +79,15 @@ pubsub.publish("my channel", {
 Use the rest of the kafkajs options:
 
 ```javascript
-const event = {/* ... */};
-const headers = {
-  header1: "value"
+const event = {
+  /* ... */
 };
-const producerOptions = { /* options from kafka.js.org/docs/producing: acks, timeout, etc */ };
+const headers = {
+  header1: "value",
+};
+const producerOptions = {
+  /* options from kafka.js.org/docs/producing: acks, timeout, etc */
+};
 
 pubsub.publish("my channel", event, headers, producerOptions);
 ```
