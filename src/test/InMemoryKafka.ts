@@ -1,5 +1,7 @@
 // copied from: https://github.com/Wei-Zou/jest-mock-kafkajs/blob/master/__mocks__/kafkajs.js
 
+import { EventEmitter } from "events";
+
 export class Producer {
   private sendCb: any;
   constructor({ sendCb }: any) {
@@ -19,14 +21,19 @@ export class Producer {
   }
 }
 
-class Consumer {
+class Consumer extends EventEmitter {
   private groupId: string;
   private subscribeCb: any;
   eachMessage: any;
+  events = {
+    FETCH_START: "consumer.fetch_start",
+  };
 
-  constructor({ groupId, subscribeCb }: any) {
+  constructor({ groupId, subscribeCb, onConsumerCreated }: any) {
+    super();
     this.groupId = groupId;
     this.subscribeCb = subscribeCb;
+    onConsumerCreated(this);
   }
 
   public getGroupId() {
@@ -42,6 +49,7 @@ class Consumer {
   }
 
   public async run({ eachMessage }: { eachMessage: (message: any) => void }) {
+    this.emit(this.events.FETCH_START, {});
     this.eachMessage = eachMessage;
   }
 
@@ -52,9 +60,11 @@ class Consumer {
 
 export class Kafka {
   private topics: { [key: string]: { [key: string]: Consumer[] } };
+  private onConsumerCreated: (consumer: Consumer) => void;
 
-  constructor() {
+  constructor(onConsumerCreated?: (consumer: Consumer) => void) {
     this.topics = {};
+    this.onConsumerCreated = onConsumerCreated;
   }
 
   public producer() {
@@ -67,6 +77,7 @@ export class Kafka {
     return new Consumer({
       groupId,
       subscribeCb: this._subscribeCb.bind(this),
+      onConsumerCreated: this.onConsumerCreated,
     });
   }
 
