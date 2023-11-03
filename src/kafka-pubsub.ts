@@ -44,7 +44,7 @@ export class KafkaPubSub implements PubSubEngine {
     groupIdPrefix,
     producerConfig = {},
     consumerConfig = {},
-    resolveChannelFromMessage = defaultChannelResolver
+    resolveChannelFromMessage = defaultChannelResolver,
   }: KafkaPubSubInput): Promise<KafkaPubSub> {
     const pubsub = new KafkaPubSub({
       kafka,
@@ -65,7 +65,7 @@ export class KafkaPubSub implements PubSubEngine {
     groupIdPrefix,
     producerConfig,
     consumerConfig,
-    resolveChannelFromMessage
+    resolveChannelFromMessage,
   }: KafkaPubSubInput) {
     this.client = kafka;
     this.subscriptionMap = {};
@@ -77,7 +77,7 @@ export class KafkaPubSub implements PubSubEngine {
       // we need all consumers listening to all messages
       groupId: `${groupIdPrefix}-${Math.ceil(Math.random() * 9999)}`,
     });
-    this.resolveChannelFromMessage = resolveChannelFromMessage
+    this.resolveChannelFromMessage = resolveChannelFromMessage;
   }
 
   /**
@@ -93,7 +93,7 @@ export class KafkaPubSub implements PubSubEngine {
     payload: string | Buffer,
     headers?: IHeaders,
     sendOptions?: object,
-    key?: string | Buffer,
+    key?: string | Buffer
   ): Promise<void> {
     await this.producer.send({
       messages: [
@@ -155,12 +155,12 @@ export class KafkaPubSub implements PubSubEngine {
     await this.consumer.subscribe({ topic });
     await this.consumer.run({
       eachMessage: async ({ message }) => {
-        const channel = this.resolveChannelFromMessage(message)
+        const channel = this.resolveChannelFromMessage(message);
 
         if (channel) {
-            this.onMessage(channel, message);
+          this.onMessage(channel, message);
         } else {
-            this.onMessage(topic, message);
+          this.onMessage(topic, message);
         }
       },
     });

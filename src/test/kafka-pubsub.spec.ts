@@ -28,7 +28,7 @@ describe("Test Suite", () => {
   it("should test basic pub sub with custom channel resolver", async () => {
     const topic = "mock_topic";
     const channel = "my_channel";
-    const payload = Buffer.from(JSON.stringify({ data: 'customKey' }));
+    const payload = Buffer.from(JSON.stringify({ data: "customKey" }));
 
     const onMessage = jest.fn((msg: KafkaMessage) => {});
 
@@ -38,10 +38,10 @@ describe("Test Suite", () => {
       topic,
       resolveChannelFromMessage(msg) {
         return JSON.parse(msg.value.toString()).data;
-      }
+      },
     });
 
-    await pubsub.subscribe('customKey', onMessage);
+    await pubsub.subscribe("customKey", onMessage);
     await pubsub.publish(channel, payload);
     expect(onMessage).toBeCalled();
     expect(onMessage).toBeCalledWith({
