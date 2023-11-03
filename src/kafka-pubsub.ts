@@ -7,6 +7,10 @@ import {
   IHeaders,
   KafkaMessage,
   ConsumerConfig,
+  ValueOf,
+  ConsumerEvents,
+  InstrumentationEvent,
+  RemoveInstrumentationEventListener,
 } from "kafkajs";
 import { PubSubAsyncIterator } from "./pubsub-async-iterator";
 
@@ -83,7 +87,7 @@ export class KafkaPubSub implements PubSubEngine {
     payload: string | Buffer,
     headers?: IHeaders,
     sendOptions?: object,
-    key?: string | Buffer,
+    key?: string | Buffer
   ): Promise<void> {
     await this.producer.send({
       messages: [
@@ -123,6 +127,13 @@ export class KafkaPubSub implements PubSubEngine {
 
   public asyncIterator<T>(triggers: string | string[]): AsyncIterator<T> {
     return new PubSubAsyncIterator<T>(this, triggers);
+  }
+
+  public consumerOn(
+    eventName: ValueOf<ConsumerEvents>,
+    listener: (event: InstrumentationEvent<unknown>) => void
+  ): RemoveInstrumentationEventListener<typeof eventName> {
+    return this.consumer.on(eventName, listener);
   }
 
   private onMessage(channel: string, message: KafkaMessage) {
