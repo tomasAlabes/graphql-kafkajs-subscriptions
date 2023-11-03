@@ -33,7 +33,7 @@ class Consumer extends EventEmitter {
     super();
     this.groupId = groupId;
     this.subscribeCb = subscribeCb;
-    onConsumerCreated(this);
+    onConsumerCreated?.(this);
   }
 
   public getGroupId() {
