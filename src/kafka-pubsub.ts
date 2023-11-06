@@ -20,13 +20,9 @@ interface KafkaPubSubInput {
 
 export type MessageHandler = (msg: KafkaMessage) => any;
 
-interface SubscriptionsMap {
-  [subId: number]: [string, MessageHandler];
-}
-
 export class KafkaPubSub implements PubSubEngine {
   private client: Kafka;
-  private subscriptionMap: SubscriptionsMap;
+  private subscriptionMap: Map<number, [string, MessageHandler]>;
   private lastId: number = 0;
   private channelSubscriptions: { [channel: string]: Set<number> };
   private producer: Producer;
@@ -60,7 +56,7 @@ export class KafkaPubSub implements PubSubEngine {
     consumerConfig,
   }: KafkaPubSubInput) {
     this.client = kafka;
-    this.subscriptionMap = {};
+    this.subscriptionMap = new Map();
     this.channelSubscriptions = {};
     this.topic = topic;
     this.producer = this.client.producer(producerConfig);
@@ -108,7 +104,7 @@ export class KafkaPubSub implements PubSubEngine {
     _?: any
   ): Promise<number> {
     this.lastId = this.lastId + 1;
-    this.subscriptionMap[this.lastId] = [channel, onMessage];
+    this.subscriptionMap.set(this.lastId, [channel, onMessage]);
     this.channelSubscriptions[channel] = (
       this.channelSubscriptions[channel] || new Set()
     ).add(this.lastId);
@@ -116,9 +112,9 @@ export class KafkaPubSub implements PubSubEngine {
   }
 
   public unsubscribe(index: number) {
-    const [channel] = this.subscriptionMap[index];
+    const [channel] = this.subscriptionMap.get(index);
     this.channelSubscriptions[channel].delete(index);
-    this.subscriptionMap[index] = undefined;
+    this.subscriptionMap.delete(index);
   }
 
   public asyncIterator<T>(triggers: string | string[]): AsyncIterator<T> {
@@ -131,7 +127,7 @@ export class KafkaPubSub implements PubSubEngine {
       return;
     } // no subscribers, don't publish msg
     subscriptions.forEach((subId) => {
-      const [cnl, listener] = this.subscriptionMap[subId];
+      const [cnl, listener] = this.subscriptionMap.get(subId);
       listener(message);
     });
   }
