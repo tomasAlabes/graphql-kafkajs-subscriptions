@@ -27,7 +27,8 @@ interface SubscriptionsMap {
 export class KafkaPubSub implements PubSubEngine {
   private client: Kafka;
   private subscriptionMap: SubscriptionsMap;
-  private channelSubscriptions: { [channel: string]: number[] };
+  private lastId: number = 0;
+  private channelSubscriptions: { [channel: string]: Set<number> };
   private producer: Producer;
   private consumer: Consumer;
   private topic: string;
@@ -83,7 +84,7 @@ export class KafkaPubSub implements PubSubEngine {
     payload: string | Buffer,
     headers?: IHeaders,
     sendOptions?: object,
-    key?: string | Buffer,
+    key?: string | Buffer
   ): Promise<void> {
     await this.producer.send({
       messages: [
@@ -106,19 +107,20 @@ export class KafkaPubSub implements PubSubEngine {
     onMessage: MessageHandler,
     _?: any
   ): Promise<number> {
-    const index = Object.keys(this.subscriptionMap).length;
-    this.subscriptionMap[index] = [channel, onMessage];
+    this.lastId = this.lastId + 1;
+    this.subscriptionMap[this.lastId] = [channel, onMessage];
     this.channelSubscriptions[channel] = (
-      this.channelSubscriptions[channel] || []
-    ).concat(index);
-    return index;
+      this.channelSubscriptions[channel] || new Set()
+    ).add(this.lastId);
+    return this.lastId;
   }
 
   public unsubscribe(index: number) {
     const [channel] = this.subscriptionMap[index];
-    this.channelSubscriptions[channel] = this.channelSubscriptions[
-      channel
-    ].filter((subId) => subId !== index);
+    const subs = this.channelSubscriptions[channel];
+    subs.delete(index);
+    this.channelSubscriptions[channel] = subs;
+    this.subscriptionMap[index] = undefined;
   }
 
   public asyncIterator<T>(triggers: string | string[]): AsyncIterator<T> {
@@ -130,10 +132,10 @@ export class KafkaPubSub implements PubSubEngine {
     if (!subscriptions) {
       return;
     } // no subscribers, don't publish msg
-    for (const subId of subscriptions) {
+    subscriptions.forEach((subId) => {
       const [cnl, listener] = this.subscriptionMap[subId];
       listener(message);
-    }
+    });
   }
 
   private async connectProducer() {
