@@ -24,7 +24,7 @@ export class KafkaPubSub implements PubSubEngine {
   private client: Kafka;
   private subscriptionMap: Map<number, [string, MessageHandler]>;
   private lastId: number = 0;
-  private channelSubscriptions: { [channel: string]: Set<number> };
+  private channelSubscriptions: Map<string, Set<number>>;
   private producer: Producer;
   private consumer: Consumer;
   private topic: string;
@@ -57,7 +57,7 @@ export class KafkaPubSub implements PubSubEngine {
   }: KafkaPubSubInput) {
     this.client = kafka;
     this.subscriptionMap = new Map();
-    this.channelSubscriptions = {};
+    this.channelSubscriptions = new Map();
     this.topic = topic;
     this.producer = this.client.producer(producerConfig);
     this.consumer = this.client.consumer({
@@ -105,15 +105,21 @@ export class KafkaPubSub implements PubSubEngine {
   ): Promise<number> {
     this.lastId = this.lastId + 1;
     this.subscriptionMap.set(this.lastId, [channel, onMessage]);
-    this.channelSubscriptions[channel] = (
-      this.channelSubscriptions[channel] || new Set()
-    ).add(this.lastId);
+    const subscriptions = this.channelSubscriptions.get(channel) ?? new Set();
+    subscriptions.add(this.lastId);
+    this.channelSubscriptions.set(channel, subscriptions);
+
     return this.lastId;
   }
 
   public unsubscribe(index: number) {
     const [channel] = this.subscriptionMap.get(index);
-    this.channelSubscriptions[channel].delete(index);
+    const subscriptions = this.channelSubscriptions.get(channel);
+    subscriptions.delete(index);
+    if (subscriptions.size === 0) {
+      this.channelSubscriptions.delete(channel);
+    }
+
     this.subscriptionMap.delete(index);
   }
 
@@ -122,7 +128,7 @@ export class KafkaPubSub implements PubSubEngine {
   }
 
   private onMessage(channel: string, message: KafkaMessage) {
-    const subscriptions = this.channelSubscriptions[channel];
+    const subscriptions = this.channelSubscriptions.get(channel);
     if (!subscriptions) {
       return;
     } // no subscribers, don't publish msg
