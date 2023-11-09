@@ -37,7 +37,7 @@ export class PubSubAsyncIterator<T> implements AsyncIterator<T> {
     options?: Object
   ) {
     this.pubsub = pubsub;
-    this.options = options;
+    this.options = options ?? {};
     this.pullQueue = [];
     this.pushQueue = [];
     this.listening = true;
@@ -50,12 +50,12 @@ export class PubSubAsyncIterator<T> implements AsyncIterator<T> {
     return this.listening ? this.pullValue() : this.return();
   }
 
-  public async return() {
+  public async return(): Promise<IteratorResult<T, any>> {
     await this.emptyQueue();
     return { value: undefined, done: true };
   }
 
-  public async throw(error) {
+  public async throw(error?: any): Promise<IteratorResult<T, any>> {
     await this.emptyQueue();
     return Promise.reject(error);
   }
@@ -72,10 +72,13 @@ export class PubSubAsyncIterator<T> implements AsyncIterator<T> {
   private pubsub: PubSubEngine;
   private options: Object;
 
-  private async pushValue(event) {
+  private async pushValue(event: any) {
     await this.subscribeAll();
-    if (this.pullQueue.length !== 0) {
-      this.pullQueue.shift()({ value: event, done: false });
+    if (this.pullQueue && this.pullQueue.length !== 0) {
+      const func = this.pullQueue.shift();
+      if (func) {
+        func({ value: event, done: false });
+      }
     } else {
       this.pushQueue.push(event);
     }

@@ -23,7 +23,7 @@ export type MessageHandler = (msg: KafkaMessage) => any;
 export class KafkaPubSub implements PubSubEngine {
   private client: Kafka;
   private subscriptionMap: Map<number, [string, MessageHandler]>;
-  private lastId: number = 0;
+  private lastId = 0;
   private channelSubscriptions: Map<string, Set<number>>;
   private producer: Producer;
   private consumer: Consumer;
@@ -113,10 +113,14 @@ export class KafkaPubSub implements PubSubEngine {
   }
 
   public unsubscribe(index: number) {
-    const [channel] = this.subscriptionMap.get(index);
+    const subscription = this.subscriptionMap.get(index);
+    if (!subscription) {
+      return;
+    }
+    const [channel] = subscription;
     const subscriptions = this.channelSubscriptions.get(channel);
-    subscriptions.delete(index);
-    if (subscriptions.size === 0) {
+    subscriptions?.delete(index);
+    if (subscriptions?.size === 0) {
       this.channelSubscriptions.delete(channel);
     }
 
@@ -133,8 +137,11 @@ export class KafkaPubSub implements PubSubEngine {
       return;
     } // no subscribers, don't publish msg
     subscriptions.forEach((subId) => {
-      const [cnl, listener] = this.subscriptionMap.get(subId);
-      listener(message);
+      const subscription = this.subscriptionMap.get(subId);
+      if (subscription) {
+        const [_, listener] = subscription;
+        listener(message);
+      }
     });
   }
 
