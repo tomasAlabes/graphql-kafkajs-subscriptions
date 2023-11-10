@@ -34,6 +34,7 @@ export class PubSubAsyncIterator<T> implements AsyncIterator<T> {
   constructor(
     pubsub: PubSubEngine,
     eventNames: string | string[],
+    // eslint-disable-next-line @typescript-eslint/ban-types
     options?: Object
   ) {
     this.pubsub = pubsub;
@@ -50,12 +51,12 @@ export class PubSubAsyncIterator<T> implements AsyncIterator<T> {
     return this.listening ? this.pullValue() : this.return();
   }
 
-  public async return(): Promise<IteratorResult<T, any>> {
+  public async return(): Promise<IteratorResult<T, unknown>> {
     await this.emptyQueue();
     return { value: undefined, done: true };
   }
 
-  public async throw(error?: any): Promise<IteratorResult<T, any>> {
+  public async throw(error?: unknown): Promise<IteratorResult<T, unknown>> {
     await this.emptyQueue();
     return Promise.reject(error);
   }
@@ -64,15 +65,17 @@ export class PubSubAsyncIterator<T> implements AsyncIterator<T> {
     return this;
   }
 
+  // eslint-disable-next-line @typescript-eslint/ban-types
   private pullQueue: Function[];
-  private pushQueue: any[];
+  private pushQueue: unknown[];
   private eventsArray: string[];
   private subscriptionIds: Promise<number[]> | undefined;
   private listening: boolean;
   private pubsub: PubSubEngine;
+  // eslint-disable-next-line @typescript-eslint/ban-types
   private options: Object;
 
-  private async pushValue(event: any) {
+  private async pushValue(event: unknown) {
     await this.subscribeAll();
     if (this.pullQueue && this.pullQueue.length !== 0) {
       const func = this.pullQueue.shift();

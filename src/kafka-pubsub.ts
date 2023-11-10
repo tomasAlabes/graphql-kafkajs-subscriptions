@@ -18,13 +18,17 @@ interface KafkaPubSubInput {
   consumerConfig?: Omit<ConsumerConfig, "groupId">;
 }
 
-export type MessageHandler = (msg: KafkaMessage) => any;
+export type MessageHandler = (msg: KafkaMessage) => unknown;
+
+interface SubscriptionsMap {
+  [subId: number]: [string, MessageHandler];
+}
 
 export class KafkaPubSub implements PubSubEngine {
   private client: Kafka;
-  private subscriptionMap: Map<number, [string, MessageHandler]>;
+  private subscriptionMap: SubscriptionsMap;
   private lastId = 0;
-  private channelSubscriptions: Map<string, Set<number>>;
+  private channelSubscriptions: { [channel: string]: Set<number> };
   private producer: Producer;
   private consumer: Consumer;
   private topic: string;
@@ -56,8 +60,8 @@ export class KafkaPubSub implements PubSubEngine {
     consumerConfig,
   }: KafkaPubSubInput) {
     this.client = kafka;
-    this.subscriptionMap = new Map();
-    this.channelSubscriptions = new Map();
+    this.subscriptionMap = {};
+    this.channelSubscriptions = {};
     this.topic = topic;
     this.producer = this.client.producer(producerConfig);
     this.consumer = this.client.consumer({
@@ -101,30 +105,31 @@ export class KafkaPubSub implements PubSubEngine {
   public async subscribe(
     channel: string,
     onMessage: MessageHandler,
-    _?: any
+    _?: unknown
   ): Promise<number> {
     this.lastId = this.lastId + 1;
-    this.subscriptionMap.set(this.lastId, [channel, onMessage]);
-    const subscriptions = this.channelSubscriptions.get(channel) ?? new Set();
-    subscriptions.add(this.lastId);
-    this.channelSubscriptions.set(channel, subscriptions);
-
+    this.subscriptionMap[this.lastId] = [channel, onMessage];
+    this.channelSubscriptions[channel] = (
+      this.channelSubscriptions[channel] || new Set()
+    ).add(this.lastId);
     return this.lastId;
   }
 
   public unsubscribe(index: number) {
-    const subscription = this.subscriptionMap.get(index);
+    const subscription = this.subscriptionMap[index];
     if (!subscription) {
       return;
     }
+
     const [channel] = subscription;
-    const subscriptions = this.channelSubscriptions.get(channel);
-    subscriptions?.delete(index);
-    if (subscriptions?.size === 0) {
-      this.channelSubscriptions.delete(channel);
+    const subscriptions = this.channelSubscriptions[channel];
+    this.channelSubscriptions[channel]?.delete(index);
+
+    if (subscriptions && subscriptions.size === 0) {
+      delete this.channelSubscriptions[channel];
     }
 
-    this.subscriptionMap.delete(index);
+    delete this.subscriptionMap[index];
   }
 
   public asyncIterator<T>(triggers: string | string[]): AsyncIterator<T> {
@@ -132,12 +137,12 @@ export class KafkaPubSub implements PubSubEngine {
   }
 
   private onMessage(channel: string, message: KafkaMessage) {
-    const subscriptions = this.channelSubscriptions.get(channel);
+    const subscriptions = this.channelSubscriptions[channel];
     if (!subscriptions) {
       return;
     } // no subscribers, don't publish msg
     subscriptions.forEach((subId) => {
-      const subscription = this.subscriptionMap.get(subId);
+      const subscription = this.subscriptionMap[subId];
       if (subscription) {
         const [_, listener] = subscription;
         listener(message);
