@@ -25,6 +25,7 @@ interface SubscriptionsMap {
 }
 
 export class KafkaPubSub implements PubSubEngine {
+  private static consumerGroupIdCounter = 0;
   private client: Kafka;
   private subscriptionMap: SubscriptionsMap;
   private channelSubscriptions: { [channel: string]: number[] };
@@ -66,7 +67,7 @@ export class KafkaPubSub implements PubSubEngine {
     this.consumer = this.client.consumer({
       ...consumerConfig,
       // we need all consumers listening to all messages
-      groupId: `${groupIdPrefix}-${Math.ceil(Math.random() * 9999)}`,
+      groupId: `${groupIdPrefix}-${KafkaPubSub.consumerGroupIdCounter++}`,
     });
   }
 
