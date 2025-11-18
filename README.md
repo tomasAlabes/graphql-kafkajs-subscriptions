@@ -32,6 +32,40 @@ export const pubsub = KafkaPubSub.create({
 })
 ```
 
+#### Configurable Consumer Group ID
+
+You can now configure the Kafka consumer group ID in two ways:
+
+**Option 1: Using `groupIdPrefix` (generates random group ID)**
+- A random suffix is appended to the prefix on each instance
+- Creates a new consumer group on every deployment
+- Best for development or when you need completely independent consumers
+
+```javascript
+export const pubsub = KafkaPubSub.create({
+  topic: 'my-topic',
+  kafka: new Kafka({/* ... */}),
+  groupIdPrefix: "my-group-id-prefix", // Will generate: my-group-id-prefix-1234
+})
+```
+
+**Option 2: Using `consumerConfig.groupId` (fixed group ID)**
+- Use a fixed consumer group ID that persists across deployments
+- Prevents creation of hundreds of unused consumer groups
+- **Recommended for production deployments**
+
+```javascript
+export const pubsub = KafkaPubSub.create({
+  topic: 'my-topic',
+  kafka: new Kafka({/* ... */}),
+  consumerConfig: {
+    groupId: 'my-stable-group-id' // Fixed group ID
+  }
+})
+```
+
+**Note:** You must provide either `groupIdPrefix` or `consumerConfig.groupId`. If both are provided, `consumerConfig.groupId` takes precedence.
+
 ### Subscription Resolver
 
 ```javascript
