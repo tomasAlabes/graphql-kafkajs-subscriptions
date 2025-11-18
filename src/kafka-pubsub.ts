@@ -13,9 +13,9 @@ import { PubSubAsyncIterator } from "./pubsub-async-iterator";
 interface KafkaPubSubInput {
   kafka: Kafka;
   topic: string;
-  groupIdPrefix: string;
+  groupIdPrefix?: string;
   producerConfig?: ProducerConfig;
-  consumerConfig?: Omit<ConsumerConfig, "groupId">;
+  consumerConfig?: Omit<ConsumerConfig, "groupId"> & { groupId?: string };
 }
 
 export type MessageHandler = (msg: KafkaMessage) => any;
@@ -25,6 +25,7 @@ interface SubscriptionsMap {
 }
 
 export class KafkaPubSub implements PubSubEngine {
+  private static consumerGroupIdCounter = 0;
   private client: Kafka;
   private subscriptionMap: SubscriptionsMap;
   private channelSubscriptions: { [channel: string]: number[] };
@@ -63,10 +64,24 @@ export class KafkaPubSub implements PubSubEngine {
     this.channelSubscriptions = {};
     this.topic = topic;
     this.producer = this.client.producer(producerConfig);
+
+    // Determine groupId: use consumerConfig.groupId if provided, otherwise generate from prefix
+    let groupId: string;
+    if (consumerConfig?.groupId) {
+      groupId = consumerConfig.groupId;
+    } else if (groupIdPrefix) {
+      // we need all consumers listening to all messages
+      groupId = `${groupIdPrefix}-${Math.ceil(Math.random() * 9999)}`;
+    } else {
+      throw new Error(
+        'Either groupIdPrefix or consumerConfig.groupId must be provided'
+      );
+    }
+
     this.consumer = this.client.consumer({
       ...consumerConfig,
       // we need all consumers listening to all messages
-      groupId: `${groupIdPrefix}-${Math.ceil(Math.random() * 9999)}`,
+      groupId: `${groupIdPrefix}-${KafkaPubSub.consumerGroupIdCounter++}`,
     });
   }
 
