@@ -74,7 +74,7 @@ export class KafkaPubSub implements PubSubEngine {
       groupId = consumerConfig.groupId;
     } else if (groupIdPrefix) {
       // we need all consumers listening to all messages
-      groupId = `${groupIdPrefix}-${Math.ceil(Math.random() * 9999)}`;
+      groupId = `${groupIdPrefix}-${KafkaPubSub.consumerGroupIdCounter++}`;
     } else {
       throw new Error(
         'Either groupIdPrefix or consumerConfig.groupId must be provided'
@@ -83,8 +83,7 @@ export class KafkaPubSub implements PubSubEngine {
 
     this.consumer = this.client.consumer({
       ...consumerConfig,
-      // we need all consumers listening to all messages
-      groupId: `${groupIdPrefix}-${KafkaPubSub.consumerGroupIdCounter++}`,
+      groupId,
     });
   }
 
