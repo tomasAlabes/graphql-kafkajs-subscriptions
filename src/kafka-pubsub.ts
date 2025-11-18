@@ -73,7 +73,7 @@ export class KafkaPubSub implements PubSubEngine {
       groupId = `${groupIdPrefix}-${Math.ceil(Math.random() * 9999)}`;
     } else {
       throw new Error(
-        'Either groupIdPrefix or consumerConfig.groupId must be provided'
+        "Either groupIdPrefix or consumerConfig.groupId must be provided"
       );
     }
 
@@ -96,7 +96,7 @@ export class KafkaPubSub implements PubSubEngine {
     payload: string | Buffer,
     headers?: IHeaders,
     sendOptions?: object,
-    key?: string | Buffer,
+    key?: string | Buffer
   ): Promise<void> {
     await this.producer.send({
       messages: [
