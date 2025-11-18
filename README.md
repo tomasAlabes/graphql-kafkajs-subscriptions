@@ -124,3 +124,35 @@ pubsub.publish("my channel", event, headers, producerOptions);
 This ends up publishing the event to kafka (to the topic you used to create the `kafkaPubSub`)
 and received by all consumers. The consumer which is listening to `my channel` will send it
 to the client.
+
+### Listening to Consumer Lifecycle Events
+
+You can listen to Kafka consumer lifecycle events such as `consumer.crash`, `consumer.stop`, `consumer.disconnect`, and others. This is useful for monitoring, error handling, and graceful shutdowns.
+
+```javascript
+// Listen to consumer crash events
+pubsub.consumerOn('consumer.crash', (event) => {
+  console.error('Consumer crashed:', event.payload.error);
+  // Handle crash - e.g., alert monitoring system, attempt recovery
+});
+
+// Listen to consumer stop events
+pubsub.consumerOn('consumer.stop', (event) => {
+  console.log('Consumer stopped');
+});
+
+// Listen to consumer disconnect events
+pubsub.consumerOn('consumer.disconnect', (event) => {
+  console.log('Consumer disconnected');
+});
+
+// The consumerOn method returns a function to remove the listener
+const removeListener = pubsub.consumerOn('consumer.crash', (event) => {
+  console.error('Crash detected:', event.payload.error);
+});
+
+// Later, you can remove the listener
+removeListener();
+```
+
+For a complete list of consumer events, refer to the [KafkaJS documentation](https://kafka.js.org/docs/instrumentation-events#consumer).

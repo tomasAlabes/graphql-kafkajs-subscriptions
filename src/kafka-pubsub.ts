@@ -7,6 +7,9 @@ import {
   IHeaders,
   KafkaMessage,
   ConsumerConfig,
+  ConsumerEvents,
+  RemoveInstrumentationEventListener,
+  ValueOf,
 } from "kafkajs";
 import { PubSubAsyncIterator } from "./pubsub-async-iterator";
 
@@ -138,6 +141,34 @@ export class KafkaPubSub implements PubSubEngine {
 
   public asyncIterator<T>(triggers: string | string[]): AsyncIterator<T> {
     return new PubSubAsyncIterator<T>(this, triggers);
+  }
+
+  /**
+   * Register an event listener on the Kafka consumer.
+   * This allows you to listen to consumer lifecycle events such as 'consumer.stop', 'consumer.crash', etc.
+   *
+   * @param eventName - The name of the consumer event to listen to
+   * @param listener - The callback function to execute when the event is emitted
+   * @returns A function to remove the event listener
+   *
+   * @example
+   * ```typescript
+   * // Listen to consumer crash events
+   * pubsub.consumerOn('consumer.crash', (event) => {
+   *   console.error('Consumer crashed:', event.payload.error);
+   * });
+   *
+   * // Listen to consumer stop events
+   * pubsub.consumerOn('consumer.stop', (event) => {
+   *   console.log('Consumer stopped');
+   * });
+   * ```
+   */
+  public consumerOn(
+    eventName: ValueOf<ConsumerEvents>,
+    listener: (event: any) => void
+  ): RemoveInstrumentationEventListener<typeof eventName> {
+    return this.consumer.on(eventName, listener);
   }
 
   private onMessage(channel: string, message: KafkaMessage) {
