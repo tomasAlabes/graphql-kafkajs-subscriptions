@@ -77,7 +77,7 @@ export class KafkaPubSub implements PubSubEngine {
       groupId = `${groupIdPrefix}-${KafkaPubSub.consumerGroupIdCounter++}`;
     } else {
       throw new Error(
-        'Either groupIdPrefix or consumerConfig.groupId must be provided'
+        "Either groupIdPrefix or consumerConfig.groupId must be provided"
       );
     }
 
@@ -100,7 +100,7 @@ export class KafkaPubSub implements PubSubEngine {
     payload: string | Buffer,
     headers?: IHeaders,
     sendOptions?: object,
-    key?: string | Buffer,
+    key?: string | Buffer
   ): Promise<void> {
     await this.producer.send({
       messages: [
