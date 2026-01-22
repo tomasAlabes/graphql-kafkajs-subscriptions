@@ -27,12 +27,19 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
       - run: yarn --frozen-lockfile
-      - run: yarn release
-      - run: npm publish
+      
       - uses: fregante/setup-git-user@v1
+      - run: yarn release
       - run: git push --follow-tags origin master
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm publish
