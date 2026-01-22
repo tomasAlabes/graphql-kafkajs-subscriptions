@@ -2,7 +2,11 @@ name: Release
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
+
+permissions:
+  id-token: write # Required for OIDC
+  contents: read
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -11,23 +15,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v2
-    - run: yarn --frozen-lockfile
-    - run: yarn test
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - run: yarn --frozen-lockfile
+      - run: yarn test
 
   publish:
     needs: test
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v2
-    - run: yarn --frozen-lockfile
-    - uses: fregante/setup-git-user@v1
-    - run: yarn release
-    - run: git push --follow-tags origin master
-    - uses: JS-DevTools/npm-publish@v1
-      with:
-        check-version: true
-        token: ${{ secrets.NPM_TOKEN }}
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - run: yarn --frozen-lockfile
+      - uses: fregante/setup-git-user@v1
+      - run: yarn release
+      - run: git push --follow-tags origin master
+      - run: npm publish
