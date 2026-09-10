@@ -1,6 +1,6 @@
 {
   "name": "graphql-kafkajs-subscriptions",
-  "version": "4.0.12",
+  "version": "4.0.13",
   "description": "Apollo graphql subscription over Kafka protocol",
   "keywords": [
     "graphql",
